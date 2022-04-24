@@ -32,7 +32,7 @@ let router =  new VueRouter({
 })
 
 router.beforeEach( async (to,from,next) => { 
-    let token = localStorage.getItem('TOKEN')
+    let token = sessionStorage.getItem('TOKEN')
     let name = store.state.user.userInfo.name
     if (token) {
         // 登录情况下禁止用户跳转至登录页面
