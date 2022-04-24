@@ -17,7 +17,6 @@ export default {
   },
   mounted(){
     this.$store.dispatch("getCategoryList");
-    console.log(1);
   }
 }
 </script>
