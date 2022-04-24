@@ -1,4 +1,4 @@
-# shp_vue
+# yhp_vue
 
 ## Project setup
 ```
