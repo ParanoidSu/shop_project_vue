@@ -28,10 +28,13 @@
           <div class="sui-navbar">
             <div class="navbar-inner filter">
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <li :class="{active:isActive}" @click="changOrder('1')">
+                  <a href="#">综合<span  v-show="isActive" class="iconfont" :class="{'icon-todown':!arrowOrder,'icon-arrowup':arrowOrder}"></span></a>
                 </li>
-                <li>
+                <li :class="{active:!isActive}" @click="changOrder('2')">
+                  <a href="#">价格<span v-show="!isActive" class="iconfont " :class="{'icon-todown':!arrowOrder,'icon-arrowup':arrowOrder}"></span></a>
+                </li>
+                  <!-- <li>
                   <a href="#">销量</a>
                 </li>
                 <li>
@@ -39,13 +42,10 @@
                 </li>
                 <li>
                   <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
+                </li> -->
+                <!-- <li>
                   <a href="#">价格⬇</a>
-                </li>
+                </li> -->
               </ul>
             </div>
           </div>
@@ -54,9 +54,9 @@
               <li class="yui3-u-1-5" v-for="goods in goodsList" :key="goods.id">
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a href="item.html" target="_blank"
+                    <router-link :to="`/detail/${goods.id}`"
                       ><img :src="goods.defaultImg"
-                    /></a>
+                    /></router-link>
                   </div>
                   <div class="price">
                     <strong>
@@ -90,35 +90,7 @@
               </li>
             </ul>
           </div>
-          <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
-          </div>
+         <Pagination :pageNo='searchParams.pageNo' :total='total' :pageSize='searchParams.pageSize' :continues='5' @getPageNo='getPageNo'></Pagination>
         </div>
       </div>
     </div>
@@ -127,7 +99,7 @@
 
 <script>
 import SearchSelector from "./SearchSelector/SearchSelector";
-import { mapGetters } from "vuex";
+import { mapGetters , mapState } from "vuex";
 export default {
   name: "Search",
   data() {
@@ -140,7 +112,7 @@ export default {
         keyword: "",
         props: [],
         trademark: "",
-        order: "",
+        order: "1:asc",
         pageNo: 1,
         pageSize: 10,
       },
@@ -157,22 +129,24 @@ export default {
     this.searchParams.category1Id = "";
     this.searchParams.category2Id = "";
     this.searchParams.category3Id = "";
-    // this.searchParams.keyword
   },
   methods: {
     getSearchList() {
+       this.updataSearchInfo();
       this.$store.dispatch("getSearchInfo", this.searchParams);
+      this.searchParams.category1Id = "";
+    this.searchParams.category2Id = "";
+    this.searchParams.category3Id = "";
     },
     updataSearchInfo() {
       Object.assign(this.searchParams, this.$route.query, this.$route.params);
     },
     removSearchName() {
-      this.searchParams.categoryName = "";
+      // this.searchParams.categoryName = "";
       this.getSearchList();
       this.searchParams.category1Id = undefined;
       this.searchParams.category2Id = undefined;
       this.searchParams.category3Id = undefined;
-      console.log(this.$route);
     },
     removKeyword(){
       this.searchParams.keyword = undefined 
@@ -194,14 +168,41 @@ export default {
       this.getSearchList()
     },
     removeAttrsValue(index){
-      console.log(index);
       this.searchParams.props.splice(index,1)
       this.getSearchList()
-
+    },
+    changOrder(flag){
+      let currentClickFlag = this.searchParams.order.split(':')[0]
+      let currentClickSort = this.searchParams.order.split(':')[1]
+      let newOrder = ''
+      if (flag === currentClickFlag) {
+        newOrder = `${flag}:${currentClickSort==='desc'?'asc':'desc'}`
+      }else{
+        newOrder = `${flag}:${'asc'}`
+      }
+      this.searchParams.order = newOrder
+      this.getSearchList()
+    },
+    getPageNo(pageNo){
+      this.searchParams.pageNo = pageNo
+      this.getSearchList()
     }
   },
   computed: {
     ...mapGetters(["goodsList"]),
+    isActive(){
+      if (this.searchParams.order.includes('1')) {
+        return true
+      }
+    },
+    arrowOrder(){
+      if (this.searchParams.order.includes('asc')) {
+        return true
+      }
+    },
+    ...mapState({
+      total:state=>state.search.searchInfo.total
+    })
   },
   watch: {
     $route() {

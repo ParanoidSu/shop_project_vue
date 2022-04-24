@@ -1,9 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '@/views/Home'
-import Login from '@/views/Login'
-import Register from '@/views/Register'
-import Search from '@/views/Search'
+import routes from './routes'
+import store from '@/store'
 
 Vue.use(VueRouter)
 
@@ -26,35 +24,48 @@ VueRouter.prototype.replace = function (location,resolve,reject) {
 }
 
 
-export default new VueRouter({
-    routes: [
-        {
-            path:'/',
-            redirect:'/home',
-        },
-        {
-            path:'/home',
-            name:'home',
-            component:Home,
-            meta:{showFooter:true}
-        },
-        {
-            path:'/login',
-            name:'login',
-            component:Login,
-            meta:{showFooter:false}
-        },
-        {
-            path:'/register',
-            name:'register',
-            component:Register,
-            meta:{showFooter:false}
-        },
-        {
-            path:'/search/:keyword?',
-            name:'search',
-            component:Search,
-            meta:{showFooter:true}
-        },
-    ]
+let router =  new VueRouter({
+    routes,
+    scrollBehavior (to, from, savedPosition) {
+        return { x: 0, y: 0 }
+      }
 })
+
+router.beforeEach( async (to,from,next) => { 
+    let token = localStorage.getItem('TOKEN')
+    let name = store.state.user.userInfo.name
+    if (token) {
+        // 登录情况下禁止用户跳转至登录页面
+        if (to.path ==='/login') {
+            next('/home')
+        }else{  
+            // 登录情况下用户跳转的不是登录界面 
+
+            // 能获取到用户信息就直接放行
+            if (name) {
+                next()
+            }else{
+                try {
+                     //获取不到用户信息需要再派发一次获取到用户信息
+                    await store.dispatch("getUserInfo");
+                    next()
+                } catch (error) {
+                    //token过期了 跳转到登录界面
+                    await store.dispatch("userLogout")
+                    next('/login')
+                }
+            }
+        }
+    }else{
+        //未登录访问购物车跳转至登录界面
+        let toPath = to.path
+        if ( toPath.indexOf('/trade')!=-1 ||toPath.indexOf('/pay')!=-1||toPath.indexOf('/center')!=-1||toPath.indexOf('/shopcart')!=-1 || toPath.indexOf('/addcartsuccess') !=-1 ) {
+            next('/login?redirect='+ toPath)
+        }else{
+            next()
+        }
+    
+    }
+ })
+
+export default router

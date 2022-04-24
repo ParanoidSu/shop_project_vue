@@ -4,22 +4,26 @@
     <div class="top">
       <div class="container">
         <div class="loginList">
-          <p>尚品汇欢迎您！</p>
-          <p>
+          <p>优品汇欢迎您！</p>
+          <p v-if="!userName">
             <span>请</span>
             <router-link href="###" to="/login">登录</router-link>
             <router-link to="/register" href="###" class="register"
               >免费注册</router-link
             >
           </p>
+          <p v-else>
+            <a href="">{{userName}}</a>
+            <a href="" class="register" @click="userLogout">退出登录</a>
+          </p>
         </div>
         <div class="typeList">
-          <a href="###">我的订单</a>
-          <a href="###">我的购物车</a>
-          <a href="###">我的尚品汇</a>
-          <a href="###">尚品汇会员</a>
+          <router-link  to="/center">我的订单</router-link>
+          <router-link  to="/shopcart">我的购物车</router-link>
+          <a href="###">我的优品汇</a>
+          <a href="###">优品汇会员</a>
           <a href="###">企业采购</a>
-          <a href="###">关注尚品汇</a>
+          <a href="###">关注优品汇</a>
           <a href="###">合作招商</a>
           <a href="###">商家后台</a>
         </div>
@@ -28,8 +32,9 @@
     <!--头部第二行 搜索区域-->
     <div class="bottom">
       <h1 class="logoArea">
-        <router-link to="/home" class="logo" title="尚品汇" href="###">
+        <router-link to="/home" class="logo" title="优品汇" href="###">
           <img src="./images/logo.png" alt="" />
+
         </router-link>
       </h1>
       <div class="searchArea">
@@ -67,12 +72,17 @@ export default {
       // if (this.$route.query) {
         let location = ({name:'search',params: { keyword: this.keyword || undefined }})
         this.$router.push(location)
-        console.log(this.$route,'2');
-        console.log(1);
       // }
     },
+    async userLogout(){
+      await this.$store.dispatch('userLogout')
+    }
   },
-  
+  computed:{
+    userName(){
+      return this.$store.state.user.userInfo.name
+    }
+  },
 };
 </script>
 

@@ -4,12 +4,20 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 import home from './home'
 import search from './search'
+import detail from './detail'
+import cartlist from './cartlist'
+import user from './user'
+import trade from './trade'
 
 
 
 export default new Vuex.Store({
    modules:{
        home,
-       search
+       search,
+       detail,
+       cartlist,
+       user,
+       trade
    }
 })
